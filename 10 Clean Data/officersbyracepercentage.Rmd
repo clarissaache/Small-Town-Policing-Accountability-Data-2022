@@ -1,0 +1,194 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+#loading necessary packages
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(reshape2)
+library(tidymodels)
+```
+
+```{r}
+#reading in csv files of data needed
+arrests <- read_csv("/Users/morganbernstein/Desktop/DATA+/SToPAGetDurhamData/10 Clean Data/with_beats.csv")
+```
+
+```{r}
+#looking at data
+head(arrests)
+```
+
+
+```{r}
+#simple bar plot of frequency of arrests by each race
+arrests %>% 
+  count(race) %>% 
+  mutate(frequency = n / sum(n)) %>% 
+  ggplot(aes(x = race, y = frequency, color = race)) +
+  geom_col(fill = "light gray") +
+  labs(title = "Frequency of Arrests by Race",
+       x = "Race",
+       y = "Percent of Arrests",
+       color = "Race") +
+  theme_bw()
+```
+
+
+```{r}
+#same bar plot faceted by year
+arrests %>% 
+  group_by(year) %>% 
+  count(race) %>% 
+  mutate(frequency = n / sum(n)) %>% 
+  ggplot(aes(x = race, y = frequency, color = race)) +
+  geom_col(fill = "light gray") +
+  labs(title = "Frequency of Arrests by Race",
+       subtitle = "Per Year 2018-2022",
+       x = "Race",
+       y = "Percent of Arrests",
+       color = "Race") +
+  facet_wrap(year ~. ) +
+  theme_bw()
+```
+
+```{r}
+#line plot showing the same correlation of frequency of arrests by race over years
+arrests %>% 
+  group_by(year) %>% 
+  count(race) %>% 
+  mutate(frequency = n / sum(n)) %>% 
+  ggplot(aes(x = year, y = frequency, color = race)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Frequency of Arrests by Race",
+       subtitle = "Per Year 2018-2022",
+       x = "Race",
+       y = "Percent of Arrests",
+       color = "Race") +
+  theme_bw()
+```
+
+
+
+```{r}
+#making a new column if the person was a person of color and grouping by arresting officer to count the proportion of POC arrests per officer
+arrests %>% 
+  mutate(POC = ifelse(race == "W", 1, 0)) %>% 
+  group_by(arrestingofficer) %>% 
+  count(POC)
+```
+
+
+```{r}
+#making subset of data to get total number of arrests by officer
+total_arrests <- arrests %>% 
+  count(arrestingofficer) %>% 
+  mutate(total = n)
+
+#making subset of data to get the number of POC arrests by officer
+arrests_poc <- arrests %>% 
+  mutate(POC = ifelse(race == "W", 1, 0)) %>% 
+  group_by(arrestingofficer) %>% 
+  count(POC)
+```
+
+
+```{r}
+#joining both dataframes to have number of arrests by race per officer and 
+# total number of arrests to make percentages available
+all_races <- full_join(total_arrests, arrests_poc, by = c("arrestingofficer"))
+```
+
+
+```{r}
+#mutating dataframe to get the percentage of POC arrests for each officer
+percent_poc <- all_races %>% 
+  group_by(arrestingofficer) %>% 
+  mutate(percent = n.y/total) %>% 
+  select(arrestingofficer, total, POC, percent)
+percent_poc
+```
+
+```{r}
+#changing shape of the data table so race is column names not values
+poc <- dcast(percent_poc, arrestingofficer ~ POC)
+
+#joining with the other dataframe to have total number of arrests as a column
+officerspoc <- full_join(poc, percent_poc, by = c("arrestingofficer"))
+
+#deleting duplicate values and deleting unnecessary columns
+officerspoc <- officerspoc[!duplicated(officerspoc$arrestingofficer), ]
+
+officerspoc <- subset(officerspoc, select = -c(POC, percent))
+colnames(officerspoc) <- c("arrestingofficer", "percent POC", "percent white", "total")
+head(officerspoc)
+```
+
+```{r}
+#looking at mean
+meanPOC <- mean(officerspoc$`percent POC`)
+```
+
+```{r}
+#same process as above for POC, this time with all races!
+
+#making subset of data to get total number of arrests by officer
+total_arrests <- arrests %>% 
+  count(arrestingofficer) %>% 
+  mutate(total = n)
+
+#making subset of data to get the number of arrests for each race by officer
+arrests_race <- arrests %>% 
+  group_by(arrestingofficer) %>% 
+  count(race)
+```
+
+```{r}
+total_races <- full_join(total_arrests, arrests_race, by = c("arrestingofficer"))
+```
+
+```{r}
+#mutating dataframe to get the percentage of each arce of arrests for each officer
+racepercent <- total_races %>% 
+  group_by(arrestingofficer) %>% 
+  mutate(percent = n.y/total) %>% 
+  select(arrestingofficer, total, race, percent)
+racepercent
+```
+
+```{r}
+#changing shape of the data table so race is column names not values
+race <- dcast(racepercent, arrestingofficer ~ race)
+
+#joining with the other dataframe to have total number of arrests as a column
+officersbyrace <- full_join(race, racepercent, by = c("arrestingofficer"))
+
+#deleting duplicate values and deleting unnecessary columns
+officersbyrace <- officersbyrace[!duplicated(officersbyrace$arrestingofficer), ]
+
+officersbyrace <- subset(officersbyrace, select = -c(race, percent))
+#colnames(officersbyrace) <- c("arrestingofficer", "percent POC", "percent white", "total")
+head(officersbyrace)
+```
+
+
+```{r}
+#stacked bar plot to look at percent of arrests by race for each officer
+all %>% 
+  group_by(arrestingofficer) %>% 
+  mutate(percent = n.y/total) %>% 
+  select(arrestingofficer, total, race, percent) %>% 
+  ggplot(aes(fill = race, y = percent, x = arrestingofficer)) +
+    geom_bar(position = "stack", stat = "identity")
+```
+
+
+```{r}
+#saving correct csv to our folder in github
+write.csv(officersbyrace,"/Users/morganbernstein/Desktop/DATA+/SToPAGetDurhamData/10 Clean Data/officersbyrace.csv")
+```
+
