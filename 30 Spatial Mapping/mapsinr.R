@@ -12,7 +12,6 @@ years <- read.csv("30 Spatial Mapping/years.csv")
 with_beats <- read_csv("10 Clean Data/with_beats.csv")
 
 # merge geometry file with information files
-p <- full_join(durham, beat, by = c("Beat" = "LAWBEAT"))
 years_withgeom <- full_join(durham, years, by = c("Beat" = "LAWBEAT"))
 
 #changes mode of tmaps to control interactivity
@@ -65,10 +64,6 @@ percentage_of_race <- racial_counts %>%
 
 #creates new data frame so we have time odf day with geometries for each beat
 day_time <- full_join(durham, percentage_of_race, by = c("Beat" = "LAWBEAT"))
-
-
-# changes column ordering to help with understanding
-day_time$georgefloyd <- factor(day_time$georgefloyd, levels = c("Pre George Floyd", "Post George Floyd"))
 
 # filters out times of day we're unsure about
 day_time <- day_time %>% 
