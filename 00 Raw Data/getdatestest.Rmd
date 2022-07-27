@@ -1,0 +1,62 @@
+---
+title: "datefunctiontest"
+output: html_document
+---
+
+```{r}
+library(stringr)
+# startdates <- list("01/01/2019", "01/31/2019")
+```
+
+```{r}
+
+getdates <- function(end_date) {
+  
+  # get the a date 30 days prior
+  start_date <- as.Date(end_date,"%m/%d/%Y") - 30
+  
+  # rebuild the string
+  startyear <- format(start_date, "%Y")
+  startmonth <- format(start_date, "%m")
+  startday <- format(start_date, "%d")
+  newstart <- str_replace_all(paste(startmonth, "/", startday, "/", startyear), " ", "")
+  
+  return(newstart)
+}
+```
+
+```{r}
+#testing the function
+getdates('09/11/2001')
+```
+
+```{r}
+
+last_report_date_we_want <- "05/31/2022"
+enddate <- last_report_date_we_want
+
+#if we needed to get the last 90 days of reports we would generate 3 sets of 30 day blocks:
+
+for (x in 1:12) {
+  # get the start date of the 30 period
+  startdate <- getdates(enddate)
+  
+  # create the pair of start and end dates for the period
+  datepairs = c(enddate,startdate) 
+  
+  #update the end date so that periods don't overlap
+  enddate <- startdate 
+  enddate <- as.Date(enddate,"%m/%d/%Y") - 1
+  endyear <- format(enddate, "%Y")
+  endmonth <- format(enddate, "%m")
+  endday <- format(enddate, "%d")
+  enddate <- str_replace_all(paste(endmonth, "/", endday, "/", endyear), " ", "")
+  x <- x + 1
+  
+  print(datepairs)
+}
+
+```
+
+
+
