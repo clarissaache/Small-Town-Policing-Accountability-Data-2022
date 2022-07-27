@@ -22,7 +22,7 @@ tmap_mode("plot")
 years_map <- tm_shape(years_withgeom) +
   tm_polygons("Black.", palette = "Blues", title = "Percent Black Identified Arrests") +
   tm_facets(by = "Year", nrow = 2, free.coords = FALSE) +
-  tm_layout(main.title = "Beat Map of Percentage of Arrets that are Black Identified People faceted by year", main.title.size = 1)
+  tm_layout(main.title = "Beat Map of Percentage of Arrests that are Black Identified People faceted by year", main.title.size = 1)
 
 # plots map created in object above
 years_map
