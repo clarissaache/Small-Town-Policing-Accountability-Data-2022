@@ -8,13 +8,11 @@ library(knitr)
 chargesreal <- read.csv("10 Clean Data/CHARGES.csv") %>%
   select(-"X")
 finaldata <- read.csv("10 Clean Data/!FINAL RAW DATA.csv") %>%
-  select(-"X", -"Unnamed..0", -"Unnamed..0.1")
+  select(-"X", -"X.1")
 withbeats <- read.csv("10 Clean Data/with_beats.csv")
   
   
 #looking at datasets
-view(charges)
-view(clean02)
 view(chargesreal)
 view(finaldata)
 view(withbeats)
@@ -25,12 +23,12 @@ all_charges <- chargesreal %>%
   distinct(arrestnumber,page_num,charges,charge_type,charge_counts,
            charge_IBRcode,charge_statutenumber,charge_warrantdate,chargenum, .keep_all = TRUE) %>%
   select(arrestnumber,page_num,charges,charge_type,charge_counts,
-         charge_IBRcode,charge_statutenumber,charge_warrantdate,chargenum,agencyname,name,datetimeofarrest,
-         file,scars_tattoes_bodymarkings_etc,birthday,age,
-         race,sex,citizenship,casenumber,
+         charge_IBRcode,charge_statutenumber,charge_warrantdate,chargenum,agencyname,names,datetimeofarrest,
+         file,scars_tattoes_bodymarkings_etc,age,
+         race,sex,citizenship,casenumbers,
          skintone,height,weight,haircolor,
          eyecolor,armed,typeofarrest,placeofarrest,dates,time,
-         year,month,day,phonenumber,bonddateandtime,
+         year,month,day,bonddateandtime,
          placeconfined,bondtype,bondamount,trialdate,
          court,arrestingofficer,releaseofficer,LAWDIST,LAWBEAT, narrative
          )
